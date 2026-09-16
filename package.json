@@ -1,0 +1,22 @@
+{
+  "name": "webmunk-ext-shared",
+  "private": true,
+  "description": "Webmunk Shopping Study side-panel update; see README.md before release.",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build:preview": "node scripts/build.mjs --preview",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0",
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^24.0.0"
+  },
+  "dependencies": {
+    "firebase": "^12.15.0",
+    "@jitsu/js": "^1.10.4"
+  }
+}

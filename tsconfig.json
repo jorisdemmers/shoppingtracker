@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "allowJs": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "types": ["chrome", "node"],
+    "sourceMap": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
