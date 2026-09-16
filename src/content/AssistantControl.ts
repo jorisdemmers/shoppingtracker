@@ -2,6 +2,7 @@
 // Do not match every element mentioning Alexa: that hides ordinary Echo products.
 export const ASSISTANT_SELECTORS = [
   '#nav-rufus', '#nav-rufus-plus', '#nav-alexa', '#nav-alexa-plus',
+  '[id^="nav-rufus-disco"]', '[class^="nav-rufus-disco"]',
   '#rufus-container', '#rufus-docked-container', '#alexa-shopping-container',
   '.rufus-docked', '.rufus-sections-container', '.alexa-sections-container',
   '[role="dialog"][data-csa-c-content-id*="rufus" i]',
@@ -23,6 +24,7 @@ export class AssistantControl {
   private enabled = false;
   private marked = new Set<HTMLElement>();
   private saved = new Map<HTMLElement, { value:string; priority:string }>();
+  private bodySaved: { className: string; style: string } | null = null;
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
     if (!enabled) {
@@ -37,6 +39,12 @@ export class AssistantControl {
       this.saved.clear();
       for (const el of this.marked) delete el.dataset.wmAssistantControl;
       this.marked.clear();
+      if (this.bodySaved && document.body) {
+        document.body.setAttribute('class', this.bodySaved.className);
+        if (this.bodySaved.style) document.body.setAttribute('style', this.bodySaved.style);
+        else document.body.removeAttribute('style');
+        this.bodySaved = null;
+      }
       return;
     }
     if (!document.documentElement) return;
@@ -53,11 +61,32 @@ export class AssistantControl {
         attributeFilter:['aria-label','style','class','id']});
     }
   }
+  // Amazon docks Rufus by writing classes and a matching padding gutter onto
+  // <body> itself (e.g. rufus-docked-left + inline padding-left), not into a
+  // detectable descendant panel. A page-load script also restores this from
+  // rufus:panel:dockedState in session/local storage, so the flag must be
+  // cleared too or the gutter reappears on the next navigation.
+  private clearBodyDock(): void {
+    const body = document.body;
+    if (!body) return;
+    const dockClasses = ['rufus-docked-left', 'rufus-docked-right', 'rufus-docked-adjustable',
+      'rufus-docked-only', 'rufus-docked-opening-transition', 'rufus-cl-alexa-plus'];
+    if (!dockClasses.some(c => body.classList.contains(c))) return;
+    if (!this.bodySaved) this.bodySaved = { className: body.className, style: body.getAttribute('style') || '' };
+    for (const c of dockClasses) body.classList.remove(c);
+    for (const prop of ['padding-left', 'padding-right', 'padding-top',
+      '--rufus-docked-panel-width', '--total-rufus-panel-full-width', '--total-rufus-panel-half-width']) {
+      body.style.removeProperty(prop);
+    }
+    try { sessionStorage.removeItem('rufus:panel:dockedState'); } catch {}
+    try { localStorage.removeItem('rufus:panel:dockedState'); } catch {}
+  }
   private hide(): void {
     if (!this.style?.isConnected && this.enabled) { this.setEnabled(true); return; }
+    this.clearBodyDock();
     for (const el of document.querySelectorAll<HTMLElement>('button,[role="button"],#nav-main a,#nav-belt a')) {
       const label = (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g,' ').trim();
-      if (/^(?:ask alexa|alexa (?:for )?shopping|ask rufus|rufus|chat with (?:alexa|rufus))(?:[.!?])?$/i.test(label)) {
+      if (/^(?:ask alexa|alexa (?:for )?shopping|ask rufus|rufus|chat with (?:alexa|rufus)|open (?:alexa|rufus)(?: panel)?)(?:[.!?])?$/i.test(label)) {
         if (el.dataset.wmAssistantControl !== 'true') {
           el.dataset.wmAssistantControl = 'true'; this.marked.add(el);
         }

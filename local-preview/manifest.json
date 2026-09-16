@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Webmunk Shopping Study — LOCAL PREVIEW",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "action": {
     "default_title": "Open Webmunk study panel",
     "default_icon": "images/UvA.png"
@@ -132,5 +132,5 @@
       ]
     }
   ],
-  "version_name": "2.0.2 LOCAL PREVIEW — NOT FOR PARTICIPANTS"
+  "version_name": "2.0.3 LOCAL PREVIEW — NOT FOR PARTICIPANTS"
 }
