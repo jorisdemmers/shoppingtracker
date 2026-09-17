@@ -1403,8 +1403,6 @@ const ASSISTANT_SELECTORS = [
     'button[aria-label="Alexa Shopping" i]',
     '#nile-inline_feature_div',
     '[data-feature-name="nile-inline"]',
-    '#dpx-rex-nice-widget-container',
-    '[id^="dpx-rex-"]',
     '[data-wm-assistant-control="true"]'
 ];
 function isVisible(el) {
