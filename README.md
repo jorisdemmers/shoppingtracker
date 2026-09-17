@@ -1,8 +1,10 @@
-# Webmunk Shopping Study — side-panel update (2.0.3)
+# Webmunk Shopping Study — side-panel update (2.0.4)
 
 Download this repository using **Code → Download ZIP**, extract it, and start with LOCAL_TESTING.md. The included **local-preview/** folder is ready to load unpacked in Chrome. It is a test build, not a participant/release package.
 
 ## Changes
+
+Version 2.0.4 adds classic-only suppression of the complete “Looking for specific info?” inline Alexa widget (`#dpx-rex-nice-widget-container`), including its question input, suggestions and answer area. This exact root is excluded from dock-ancestor detection so surrounding product information stays visible. Both chat arms keep the widget. Built on Jairo’s 2.0.3 branch with his launcher/gutter fixes retained. No new permissions.
 
 Version 2.0.3 fixes classic-arm assistant suppression found broken during a live-Chrome retest on real Amazon: Amazon docks Rufus by adding classes and inline padding to `<body>` itself, which the suppression logic never touched, and the live trigger button (`#nav-rufus-disco`) wasn't in the selector list. See UX_REVIEW.md's incident section for the root cause and fix. No permission or manifest surface changes beyond the version bump.
 

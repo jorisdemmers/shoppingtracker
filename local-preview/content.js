@@ -1401,6 +1401,7 @@ const ASSISTANT_SELECTORS = [
     'a[aria-label="Alexa for Shopping" i]',
     'a[aria-label^="Ask Alexa" i]',
     'button[aria-label="Alexa Shopping" i]',
+    '#dpx-rex-nice-widget-container',
     '#nile-inline_feature_div',
     '[data-feature-name="nile-inline"]',
     '[data-wm-assistant-control="true"]'
@@ -1519,6 +1520,7 @@ class AssistantControl {
         for (const seed of [
             ...targets
         ]){
+            if (seed.id === "dpx-rex-nice-widget-container") continue;
             for(let parent = seed.parentElement, depth = 0; parent && depth < 7; parent = parent.parentElement, depth++){
                 if (parent === document.body || parent === document.documentElement || parent.matches('main,nav,header,#nav-main,#nav-belt')) break;
                 const rect = parent.getBoundingClientRect();

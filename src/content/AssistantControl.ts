@@ -11,6 +11,8 @@ export const ASSISTANT_SELECTORS = [
   'button[aria-label*="ask alexa" i]', '[role="button"][aria-label*="ask alexa" i]',
   'a[aria-label="Alexa Shopping" i]', 'a[aria-label="Alexa for Shopping" i]',
   'a[aria-label^="Ask Alexa" i]', 'button[aria-label="Alexa Shopping" i]',
+  // Product-page inline Alexa widget: root uses nice, descendants use nile.
+  '#dpx-rex-nice-widget-container',
   '#nile-inline_feature_div', '[data-feature-name="nile-inline"]',
   '[data-wm-assistant-control="true"]',
 ];
@@ -97,6 +99,8 @@ export class AssistantControl {
     // from known assistant nodes to a narrow, tall edge panel. Never hide body,
     // a product listing, navigation, or a wide page wrapper by keyword alone.
     for (const seed of [...targets]) {
+      // This is a complete inline widget, not a dock. Preserve its page ancestors.
+      if (seed.id === "dpx-rex-nice-widget-container") continue;
       for (let parent = seed.parentElement, depth = 0; parent && depth < 7; parent = parent.parentElement, depth++) {
         if (parent === document.body || parent === document.documentElement || parent.matches('main,nav,header,#nav-main,#nav-belt')) break;
         const rect = parent.getBoundingClientRect();
