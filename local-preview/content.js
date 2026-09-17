@@ -1383,6 +1383,8 @@ const ASSISTANT_SELECTORS = [
     '#nav-rufus-plus',
     '#nav-alexa',
     '#nav-alexa-plus',
+    '[id^="nav-rufus-disco"]',
+    '[class^="nav-rufus-disco"]',
     '#rufus-container',
     '#rufus-docked-container',
     '#alexa-shopping-container',
@@ -1399,6 +1401,7 @@ const ASSISTANT_SELECTORS = [
     'a[aria-label="Alexa for Shopping" i]',
     'a[aria-label^="Ask Alexa" i]',
     'button[aria-label="Alexa Shopping" i]',
+    '#dpx-rex-nice-widget-container',
     '#nile-inline_feature_div',
     '[data-feature-name="nile-inline"]',
     '[data-wm-assistant-control="true"]'
@@ -1413,6 +1416,7 @@ class AssistantControl {
     enabled = false;
     marked = new Set();
     saved = new Map();
+    bodySaved = null;
     setEnabled(enabled) {
         this.enabled = enabled;
         if (!enabled) {
@@ -1429,6 +1433,12 @@ class AssistantControl {
             this.saved.clear();
             for (const el of this.marked)delete el.dataset.wmAssistantControl;
             this.marked.clear();
+            if (this.bodySaved && document.body) {
+                document.body.setAttribute('class', this.bodySaved.className);
+                if (this.bodySaved.style) document.body.setAttribute('style', this.bodySaved.style);
+                else document.body.removeAttribute('style');
+                this.bodySaved = null;
+            }
             return;
         }
         if (!document.documentElement) return;
@@ -1457,14 +1467,49 @@ class AssistantControl {
             });
         }
     }
+    clearBodyDock() {
+        const body = document.body;
+        if (!body) return;
+        const dockClasses = [
+            'rufus-docked-left',
+            'rufus-docked-right',
+            'rufus-docked-adjustable',
+            'rufus-docked-only',
+            'rufus-docked-opening-transition',
+            'rufus-cl-alexa-plus'
+        ];
+        if (!dockClasses.some((c)=>body.classList.contains(c))) return;
+        if (!this.bodySaved) this.bodySaved = {
+            className: body.className,
+            style: body.getAttribute('style') || ''
+        };
+        for (const c of dockClasses)body.classList.remove(c);
+        for (const prop of [
+            'padding-left',
+            'padding-right',
+            'padding-top',
+            '--rufus-docked-panel-width',
+            '--total-rufus-panel-full-width',
+            '--total-rufus-panel-half-width'
+        ]){
+            body.style.removeProperty(prop);
+        }
+        try {
+            sessionStorage.removeItem('rufus:panel:dockedState');
+        } catch  {}
+        try {
+            localStorage.removeItem('rufus:panel:dockedState');
+        } catch  {}
+    }
     hide() {
         if (!this.style?.isConnected && this.enabled) {
             this.setEnabled(true);
             return;
         }
+        this.clearBodyDock();
         for (const el of document.querySelectorAll('button,[role="button"],#nav-main a,#nav-belt a')){
             const label = (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim();
-            if (/^(?:ask alexa|alexa (?:for )?shopping|ask rufus|rufus|chat with (?:alexa|rufus))(?:[.!?])?$/i.test(label)) {
+            if (/^(?:ask alexa|alexa (?:for )?shopping|ask rufus|rufus|chat with (?:alexa|rufus)|open (?:alexa|rufus)(?: panel)?)(?:[.!?])?$/i.test(label)) {
                 if (el.dataset.wmAssistantControl !== 'true') {
                     el.dataset.wmAssistantControl = 'true';
                     this.marked.add(el);
@@ -1475,6 +1520,7 @@ class AssistantControl {
         for (const seed of [
             ...targets
         ]){
+            if (seed.id === "dpx-rex-nice-widget-container") continue;
             for(let parent = seed.parentElement, depth = 0; parent && depth < 7; parent = parent.parentElement, depth++){
                 if (parent === document.body || parent === document.documentElement || parent.matches('main,nav,header,#nav-main,#nav-belt')) break;
                 const rect = parent.getBoundingClientRect();

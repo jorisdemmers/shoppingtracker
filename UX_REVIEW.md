@@ -1,3 +1,5 @@
+Version 2.0.3 addendum: live-Chrome retest of the classic arm on real Amazon (amazon.com, Sept 2026) found the "empty assistant shell" risk flagged below was real, not a heuristic false-negative. Root-caused and fixed; see incident writeup at the end of this file.
+
 Version 2.0.2 addendum: explicit Alexa reminder in guided chat; close panel after P2 handoff with a completion-only fallback. See LOCAL_TESTING.md for the separate preview tester page.
 
 # UX review and next steps — 2.0.1
@@ -32,3 +34,17 @@ The header/card appearance suggests an Edge-family browser, but this is not veri
 ## Limits
 
 39 automated checks pass. They use mocked Chrome APIs and a small simulated DOM. No live Amazon DOM inspection, Qualtrics response submission, backend delivery verification or Chrome Store submission was performed. The existing uploaded P1 export and remote surveys were not modified.
+
+## Incident — classic-arm assistant not suppressed on live Amazon (fixed in 2.0.3)
+
+First live-Chrome walkthrough of `arm=classic` on real amazon.com surfaced the exact risk this document had marked unverified ("Heuristic based on known assistant descendants; live shell/gutter removal remains unverified"). Two distinct gaps, found by inspecting the live DOM directly rather than guessing:
+
+1. **Dock gutter is on `<body>`, not a descendant panel.** Amazon reserves the Rufus panel's space by writing docking classes and inline padding directly onto `document.body` (e.g. `rufus-docked-left` + `style="padding-left: 320px"`), plus custom properties (`--rufus-docked-panel-width`, etc.). `AssistantControl.ts`'s edge-panel heuristic deliberately never touches `body` (to avoid ever hiding the whole page), so this gutter was completely outside what it could clear — suppressing the inner panel content left a matching blank space at the page edge.
+2. **Trigger control wasn't in the selector list.** The live trigger is `<button id="nav-rufus-disco" aria-label="Open Alexa panel">` wrapping two child `<div>`s (`nav-rufus-disco-avatar`, `nav-rufus-disco-text`). None of `id`, `class`, or `aria-label` matched the existing `ASSISTANT_SELECTORS` list or button-label regex, so the icon stayed visible and clickable in classic.
+
+Fix (`src/content/AssistantControl.ts`):
+- Added `clearBodyDock()`: strips the known `rufus-docked-*` classes and their associated inline padding/custom-property styles from `document.body` when present, and clears the `rufus:panel:dockedState` session/local-storage key Amazon's own bootstrap script reads on load (otherwise it re-applies the docked state on the next navigation before the content script can react). Original body class/style is restored when leaving classic.
+- Widened `ASSISTANT_SELECTORS` to `[id^="nav-rufus-disco"]` / `[class^="nav-rufus-disco"]` (prefix match, covers the button and both child divs) and widened the button-label regex to also match "Open Alexa"/"Open Rufus (panel)" phrasing.
+- Added a regression test (`tests/assistant.test.mjs`) asserting body-level docked classes and padding are cleared.
+
+Verified live in Chrome after the fix: the icon and "for shopping" label are gone, no residual gutter, ordinary page padding restored. Not yet re-verified: the same check on other Amazon locales, on dynamically-loaded/lazy Rufus mounts, or after Amazon changes this markup again — selector drift on a live third-party site is an ongoing risk, not a one-time fix. Continue with the rest of Section B of LOCAL_TESTING.md (both chat arms, other categories, resize/zoom) before treating classic as fully verified.

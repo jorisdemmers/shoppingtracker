@@ -1,5 +1,9 @@
 # Test locally before Store review
 
+## 2.0.4 focused retest
+
+Disable the old preview and load this package’s `local-preview` folder. Verify version 2.0.4 in the extension details. In classic, revisit the product page from the screenshot: the entire “Looking for specific info?” section should disappear, including question suggestions, while nearby product information and reviews remain visible. Reload and navigate to another product to check dynamically inserted content. Reset the preview session and close old Amazon tabs before repeating in `chat` and `chat_no_guide`: the section should remain usable in both. Also recheck that Jairo’s launcher and dock-gutter fixes still work. Automated checks use a simulated DOM; this live retest remains necessary.
+
 ## A. Load the ready-made preview — no terminal or backend needed
 
 1. Extract the ZIP to a normal folder. Keep it there while testing: Chrome loads unpacked code from that folder.
