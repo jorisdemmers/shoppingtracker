@@ -12,6 +12,7 @@ export const ASSISTANT_SELECTORS = [
   'a[aria-label="Alexa Shopping" i]', 'a[aria-label="Alexa for Shopping" i]',
   'a[aria-label^="Ask Alexa" i]', 'button[aria-label="Alexa Shopping" i]',
   '#nile-inline_feature_div', '[data-feature-name="nile-inline"]',
+  '#dpx-rex-nice-widget-container', '[id^="dpx-rex-"]',
   '[data-wm-assistant-control="true"]',
 ];
 export function isVisible(el: Element): boolean {
